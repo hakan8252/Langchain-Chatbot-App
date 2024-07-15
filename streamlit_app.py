@@ -105,33 +105,36 @@ if st.sidebar.button("Process URLs"):
     else:
         st.error("Please enter at least one URL.")
 
+
+# Display vector index creation status
+if os.path.exists(file_path):
+    st.text("Vector index is ready.")
+
 # Main QA Interface
 query = st.text_input("Enter your question:")
 if query:
-    # if st.session_state.vector_index is not None:
-        vectorstore = st.session_state.vector_index
-        chain = RetrievalQAWithSourcesChain.from_llm(
-            llm=GoogleGenerativeAI(model='gemini-pro', google_api_key=GOOGLE_API_KEY, temperature=0.5), 
-            retriever=vectorstore.as_retriever()
-        )
-        result = chain({"question": query}, return_only_outputs=True)
-        
-        st.header("Answer")
-        st.write(result["answer"])
+    if query and os.path.exists(file_path):
+        with open(file_path, "rb") as f:
+            vectorstore = pickle.load(f)
+            chain = RetrievalQAWithSourcesChain.from_llm(
+                llm=GoogleGenerativeAI(model='gemini-pro', google_api_key=GOOGLE_API_KEY, temperature=0.5), 
+                retriever=vectorstore.as_retriever()
+            )
+            result = chain({"question": query}, return_only_outputs=True)
+            
+            st.header("Answer")
+            st.write(result["answer"])
 
-        # Display sources, if available
-        sources = result.get("sources", "")
-        if sources:
-            st.subheader("Sources:")
-            sources_list = sources.split("\n")  # Split the sources by newline
-            for source in sources_list:
-                st.write(source)
-    # else:
-        # st.error("Please process the URLs first.")
+            # Display sources, if available
+            sources = result.get("sources", "")
+            if sources:
+                st.subheader("Sources:")
+                sources_list = sources.split("\n")  # Split the sources by newline
+                for source in sources_list:
+                    st.write(source)
 
 
 # Display processed documents
-# if st.session_state.docs:
 st.header("Processed Documents")
 for i, doc in enumerate(st.session_state.docs):
     st.subheader(f"Document {i+1}")
