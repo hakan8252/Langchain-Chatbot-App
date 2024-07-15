@@ -49,7 +49,7 @@ if st.sidebar.button("Process URLs"):
         text_splitter = RecursiveCharacterTextSplitter(
             separators=['\n\n', '\n', '.', ' '],
             chunk_size=1000,
-            # chunk_overlap=200
+            chunk_overlap=100
         )
         docs = text_splitter.split_documents(data)
         st.session_state.docs = docs  # Store docs in session state
