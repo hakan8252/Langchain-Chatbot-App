@@ -33,11 +33,11 @@ for i in range(num_urls):
     if url:
         urls.append(url)
 
-# Initialize session state for vector index and cleaned data
+# Initialize session state for vector index and docs
 if "vector_index" not in st.session_state:
     st.session_state.vector_index = None
-if "cleaned_data" not in st.session_state:
-    st.session_state.cleaned_data = []
+if "docs" not in st.session_state:
+    st.session_state.docs = []
 
 # Define file path for storing vector index
 file_path = "vector_index.pkl"
@@ -65,7 +65,6 @@ if st.sidebar.button("Process URLs"):
                 page_content=cleaned_content
             )
             cleaned_data.append(cleaned_doc)
-        st.session_state.cleaned_data = cleaned_data  # Store cleaned data in session state
         elapsed_time = time.time() - start_time
         progress.progress(2 / step_count)
         st.sidebar.text(f"Cleaning Data... {elapsed_time:.2f} seconds ✅")
@@ -78,6 +77,7 @@ if st.sidebar.button("Process URLs"):
             chunk_overlap=200
         )
         docs = text_splitter.split_documents(cleaned_data)
+        st.session_state.docs = docs  # Store docs in session state
         elapsed_time = time.time() - start_time
         progress.progress(3 / step_count)
         st.sidebar.text(f"Text Splitting... {elapsed_time:.2f} seconds ✅")
@@ -86,15 +86,15 @@ if st.sidebar.button("Process URLs"):
         start_time = time.time()
         embeddings = FakeEmbeddings(size=200)
         vectorindex_openai = FAISS.from_documents(docs, embeddings)
+        st.session_state.vector_index = vectorindex_openai  # Store vector index in session state
         elapsed_time = time.time() - start_time
         progress.progress(4 / step_count)
         st.sidebar.text(f"Building Embedding Vector... {elapsed_time:.2f} seconds ✅")
 
-        # Save Vector Index
+        # Step 5: Saving Vector Index
         start_time = time.time()
         with open(file_path, "wb") as f:
             pickle.dump(vectorindex_openai, f)
-        st.session_state.vector_index = vectorindex_openai  # Store vector index in session state
         elapsed_time = time.time() - start_time
         progress.progress(5 / step_count)
         st.sidebar.text(f"Saving Vector Index... {elapsed_time:.2f} seconds ✅")
