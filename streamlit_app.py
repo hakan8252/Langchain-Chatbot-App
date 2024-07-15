@@ -47,7 +47,7 @@ file_path = "vector_index.pkl"
 if st.sidebar.button("Process URLs"):
     if urls:
         progress = st.sidebar.progress(0)
-        step_count = 5
+        step_count = 4
 
         # Step 1: Data Loading
         start_time = time.time()
@@ -81,7 +81,7 @@ if st.sidebar.button("Process URLs"):
         docs = text_splitter.split_documents(data)
         st.session_state.docs = docs  # Store docs in session state
         elapsed_time = time.time() - start_time
-        progress.progress(3 / step_count)
+        progress.progress(2 / step_count)
         st.sidebar.text(f"Text Splitting... {elapsed_time:.2f} seconds ✅")
 
         # Step 4: Embedding
@@ -90,7 +90,7 @@ if st.sidebar.button("Process URLs"):
         vectorindex_openai = FAISS.from_documents(docs, embeddings)
         st.session_state.vector_index = vectorindex_openai  # Store vector index in session state
         elapsed_time = time.time() - start_time
-        progress.progress(4 / step_count)
+        progress.progress(3 / step_count)
         st.sidebar.text(f"Building Embedding Vector... {elapsed_time:.2f} seconds ✅")
 
         # Step 5: Saving Vector Index
@@ -98,7 +98,7 @@ if st.sidebar.button("Process URLs"):
         with open(file_path, "wb") as f:
             pickle.dump(vectorindex_openai, f)
         elapsed_time = time.time() - start_time
-        progress.progress(5 / step_count)
+        progress.progress(4 / step_count)
         st.sidebar.text(f"Saving Vector Index... {elapsed_time:.2f} seconds ✅")
 
         st.success("URLs processed successfully.")
@@ -114,7 +114,6 @@ if query:
             llm=GoogleGenerativeAI(model='gemini-pro', google_api_key=GOOGLE_API_KEY, temperature=0.5), 
             retriever=vectorstore.as_retriever()
         )
-        langchain.debug=True
         result = chain({"question": query}, return_only_outputs=True)
         
         st.header("Answer")
