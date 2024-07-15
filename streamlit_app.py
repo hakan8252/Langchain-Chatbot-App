@@ -30,6 +30,9 @@ for i in range(num_urls):
 # Define file path for storing vector index
 file_path = "vector_index.pkl"
 
+if "docs" not in st.session_state:
+    st.session_state.docs = None
+
 if st.sidebar.button("Process URLs"):
     if urls:
         progress = st.sidebar.progress(0)
