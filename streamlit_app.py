@@ -35,12 +35,6 @@ for i in range(num_urls):
     if url:
         urls.append(url)
 
-# # Initialize session state for vector index and docs
-# if "vector_index" not in st.session_state:
-#     st.session_state.vector_index = None
-# if "docs" not in st.session_state:
-#     st.session_state.docs = []
-
 # Define file path for storing vector index
 file_path = "vector_index.pkl"
 
@@ -138,6 +132,10 @@ if query:
 
 # Display processed documents
 st.header("Processed Documents")
-for i, doc in enumerate(docs):
-    st.subheader(f"Document {i+1}")
-    st.write(doc.page_content[:500] + "...")  # Display first 500 characters of each document
+# Display vector index creation status
+if docs:
+    for i, doc in enumerate(docs):
+        st.subheader(f"Document {i+1}")
+        st.write(doc.page_content[:500] + "...")  # Display first 500 characters of each document
+else:
+    st.text("There are no documents")
