@@ -132,6 +132,8 @@ if query:
                 sources_list = sources.split("\n")  # Split the sources by newline
                 for source in sources_list:
                     st.write(source)
+    else:
+        st.error("There are no vector index")
 
 
 # Display processed documents
