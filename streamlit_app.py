@@ -80,7 +80,7 @@ if st.sidebar.button("Process URLs"):
         st.error("Please enter at least one URL.")
 
 # Main QA Interface
-query = st.text_input("Enter your question:")
+query = st.text_input("Enter your question:", key="query_input", on_change=True)
 if query:
     if os.path.exists(file_path):
         with open(file_path, "rb") as f:
