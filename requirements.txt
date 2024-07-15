@@ -5,3 +5,4 @@ faiss-cpu
 unstructured
 langchain_community
 sentence_transformers
+python-dotenv
