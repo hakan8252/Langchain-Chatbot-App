@@ -1,0 +1,7 @@
+streamlit
+langchain
+langchain_google_genai
+faiss-cpu
+unstructured
+langchain_community
+sentence_transformers
