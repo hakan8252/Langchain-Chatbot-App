@@ -35,11 +35,11 @@ for i in range(num_urls):
     if url:
         urls.append(url)
 
-# Initialize session state for vector index and docs
-if "vector_index" not in st.session_state:
-    st.session_state.vector_index = None
-if "docs" not in st.session_state:
-    st.session_state.docs = []
+# # Initialize session state for vector index and docs
+# if "vector_index" not in st.session_state:
+#     st.session_state.vector_index = None
+# if "docs" not in st.session_state:
+#     st.session_state.docs = []
 
 # Define file path for storing vector index
 file_path = "vector_index.pkl"
@@ -79,7 +79,7 @@ if st.sidebar.button("Process URLs"):
             chunk_overlap=200
         )
         docs = text_splitter.split_documents(data)
-        st.session_state.docs = docs  # Store docs in session state
+        # st.session_state.docs = docs  # Store docs in session state
         elapsed_time = time.time() - start_time
         progress.progress(2 / step_count)
         st.sidebar.text(f"Text Splitting... {elapsed_time:.2f} seconds ✅")
@@ -88,7 +88,7 @@ if st.sidebar.button("Process URLs"):
         start_time = time.time()
         embeddings = FakeEmbeddings(size=200)
         vectorindex_openai = FAISS.from_documents(docs, embeddings)
-        st.session_state.vector_index = vectorindex_openai  # Store vector index in session state
+        # st.session_state.vector_index = vectorindex_openai  # Store vector index in session state
         elapsed_time = time.time() - start_time
         progress.progress(3 / step_count)
         st.sidebar.text(f"Building Embedding Vector... {elapsed_time:.2f} seconds ✅")
@@ -108,7 +108,7 @@ if st.sidebar.button("Process URLs"):
 # Main QA Interface
 query = st.text_input("Enter your question:")
 if query:
-    if st.session_state.vector_index is not None:
+    # if st.session_state.vector_index is not None:
         vectorstore = st.session_state.vector_index
         chain = RetrievalQAWithSourcesChain.from_llm(
             llm=GoogleGenerativeAI(model='gemini-pro', google_api_key=GOOGLE_API_KEY, temperature=0.5), 
@@ -126,13 +126,13 @@ if query:
             sources_list = sources.split("\n")  # Split the sources by newline
             for source in sources_list:
                 st.write(source)
-    else:
-        st.error("Please process the URLs first.")
+    # else:
+        # st.error("Please process the URLs first.")
 
 
 # Display processed documents
-if st.session_state.docs:
-    st.header("Processed Documents")
-    for i, doc in enumerate(st.session_state.docs):
-        st.subheader(f"Document {i+1}")
-        st.write(doc.page_content[:500] + "...")  # Display first 500 characters of each document
+# if st.session_state.docs:
+st.header("Processed Documents")
+for i, doc in enumerate(st.session_state.docs):
+    st.subheader(f"Document {i+1}")
+    st.write(doc.page_content[:500] + "...")  # Display first 500 characters of each document
