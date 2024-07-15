@@ -113,12 +113,12 @@ if query:
         st.error("Vector index file does not exist. Please process the URLs first.")
 
 # Display processed documents
-st.header("Processed Documents")
+# st.header("Processed Documents")
 # Access docs from session state
-docs = st.session_state.get("docs", None)
-if docs:
-    for i, doc in enumerate(docs):
-        st.subheader(f"Document {i+1}")
-        st.write(doc.page_content[:500] + "...")  # Display first 500 characters of each document
-else:
-    st.text("There are no documents")
+# docs = st.session_state.get("docs", None)
+# if docs:
+#     for i, doc in enumerate(docs):
+#         st.subheader(f"Document {i+1}")
+#         st.write(doc.page_content[:500] + "...")  # Display first 500 characters of each document
+# else:
+#     st.text("There are no documents")
