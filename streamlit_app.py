@@ -103,7 +103,7 @@ if query:
                     st.write(source)
             
             # Countdown timer
-            remaining_time = 15
+            remaining_time = 5
             with st.empty():
                 while remaining_time > 0:
                     st.write(f"Next query available in {remaining_time} seconds.")
