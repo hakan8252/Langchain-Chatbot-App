@@ -33,8 +33,11 @@ for i in range(num_urls):
     if url:
         urls.append(url)
 
-# Placeholder for main content
-main_placeholder = st.empty()
+# Initialize session state for vector index and cleaned data
+if "vector_index" not in st.session_state:
+    st.session_state.vector_index = None
+if "cleaned_data" not in st.session_state:
+    st.session_state.cleaned_data = []
 
 # Define file path for storing vector index
 file_path = "vector_index.pkl"
@@ -43,7 +46,7 @@ if st.sidebar.button("Process URLs"):
     if urls:
         progress = st.sidebar.progress(0)
         step_count = 5
-        
+
         # Step 1: Data Loading
         start_time = time.time()
         loaders = UnstructuredURLLoader(urls=urls)
@@ -51,7 +54,7 @@ if st.sidebar.button("Process URLs"):
         elapsed_time = time.time() - start_time
         progress.progress(1 / step_count)
         st.sidebar.text(f"Data Loading... {elapsed_time:.2f} seconds ✅")
-        
+
         # Step 2: Cleaning Data
         start_time = time.time()
         cleaned_data = []
@@ -62,10 +65,11 @@ if st.sidebar.button("Process URLs"):
                 page_content=cleaned_content
             )
             cleaned_data.append(cleaned_doc)
+        st.session_state.cleaned_data = cleaned_data  # Store cleaned data in session state
         elapsed_time = time.time() - start_time
         progress.progress(2 / step_count)
         st.sidebar.text(f"Cleaning Data... {elapsed_time:.2f} seconds ✅")
-        
+
         # Step 3: Text Splitting
         start_time = time.time()
         text_splitter = RecursiveCharacterTextSplitter(
@@ -77,7 +81,7 @@ if st.sidebar.button("Process URLs"):
         elapsed_time = time.time() - start_time
         progress.progress(3 / step_count)
         st.sidebar.text(f"Text Splitting... {elapsed_time:.2f} seconds ✅")
-        
+
         # Step 4: Embedding
         start_time = time.time()
         embeddings = FakeEmbeddings(size=200)
@@ -85,40 +89,40 @@ if st.sidebar.button("Process URLs"):
         elapsed_time = time.time() - start_time
         progress.progress(4 / step_count)
         st.sidebar.text(f"Building Embedding Vector... {elapsed_time:.2f} seconds ✅")
-        
+
         # Save Vector Index
         start_time = time.time()
         with open(file_path, "wb") as f:
             pickle.dump(vectorindex_openai, f)
+        st.session_state.vector_index = vectorindex_openai  # Store vector index in session state
         elapsed_time = time.time() - start_time
         progress.progress(5 / step_count)
         st.sidebar.text(f"Saving Vector Index... {elapsed_time:.2f} seconds ✅")
-        
+
         st.success("URLs processed successfully.")
     else:
         st.error("Please enter at least one URL.")
 
 # Main QA Interface
-query = main_placeholder.text_input("Enter your question:")
+query = st.text_input("Enter your question:")
 if query:
-    if os.path.exists(file_path):
-        with open(file_path, "rb") as f:
-            vectorstore = pickle.load(f)
-            chain = RetrievalQAWithSourcesChain.from_llm(
-                llm=GoogleGenerativeAI(model='gemini-pro', google_api_key=GOOGLE_API_KEY, temperature=0.9), 
-                retriever=vectorstore.as_retriever()
-            )
-            result = chain({"question": query}, return_only_outputs=True)
-            
-            st.header("Answer")
-            st.write(result["answer"])
+    if st.session_state.vector_index is not None:
+        vectorstore = st.session_state.vector_index
+        chain = RetrievalQAWithSourcesChain.from_llm(
+            llm=GoogleGenerativeAI(model='gemini-pro', google_api_key=GOOGLE_API_KEY, temperature=0.9), 
+            retriever=vectorstore.as_retriever()
+        )
+        result = chain({"question": query}, return_only_outputs=True)
+        
+        st.header("Answer")
+        st.write(result["answer"])
 
-            # Display sources, if available
-            sources = result.get("sources", "")
-            if sources:
-                st.subheader("Sources:")
-                sources_list = sources.split("\n")  # Split the sources by newline
-                for source in sources_list:
-                    st.write(source)
+        # Display sources, if available
+        sources = result.get("sources", "")
+        if sources:
+            st.subheader("Sources:")
+            sources_list = sources.split("\n")  # Split the sources by newline
+            for source in sources_list:
+                st.write(source)
     else:
         st.error("Please process the URLs first.")
