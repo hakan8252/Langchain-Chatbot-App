@@ -48,7 +48,7 @@ if st.sidebar.button("Process URLs"):
         text_splitter = RecursiveCharacterTextSplitter(
             separators=['\n\n', '\n', '.', ' '],
             chunk_size=1000,
-            chunk_overlap=200
+            # chunk_overlap=200
         )
         docs = text_splitter.split_documents(data)
         st.session_state.docs = docs  # Store docs in session state
@@ -63,6 +63,7 @@ if st.sidebar.button("Process URLs"):
         elapsed_time = time.time() - start_time
         progress.progress(3 / step_count)
         st.sidebar.text(f"Building Embedding Vector... {elapsed_time:.2f} seconds ✅")
+        time.sleep(4)
 
         # Step 5: Saving Vector Index
         start_time = time.time()
