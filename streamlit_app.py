@@ -11,6 +11,7 @@ from langchain.vectorstores import FAISS
 from langchain.schema import Document
 import langchain
 from langchain_community.embeddings import FakeEmbeddings
+import threading
 
 # Load Google API Key
 GOOGLE_API_KEY = st.secrets.secrets["GOOGLE_API_KEY"]
@@ -30,7 +31,8 @@ for i in range(num_urls):
 # Define file path for storing vector index
 file_path = "vector_index.pkl"
 
-if st.sidebar.button("Process URLs"):
+# Function to process URLs and update session state
+def process_urls(urls):
     if urls:
         progress = st.sidebar.progress(0)
         step_count = 4
@@ -42,7 +44,6 @@ if st.sidebar.button("Process URLs"):
         elapsed_time = time.time() - start_time
         progress.progress(1 / step_count)
         st.sidebar.text(f"Data Loading... {elapsed_time:.2f} seconds ✅")
-        time.sleep(4)
 
         # Step 3: Text Splitting
         start_time = time.time()
@@ -56,7 +57,6 @@ if st.sidebar.button("Process URLs"):
         elapsed_time = time.time() - start_time
         progress.progress(2 / step_count)
         st.sidebar.text(f"Text Splitting... {elapsed_time:.2f} seconds ✅")
-        time.sleep(6)
 
         # Step 4: Embedding
         start_time = time.time()
@@ -65,7 +65,6 @@ if st.sidebar.button("Process URLs"):
         elapsed_time = time.time() - start_time
         progress.progress(3 / step_count)
         st.sidebar.text(f"Building Embedding Vector... {elapsed_time:.2f} seconds ✅")
-        time.sleep(6)
 
         # Step 5: Saving Vector Index
         start_time = time.time()
@@ -79,37 +78,46 @@ if st.sidebar.button("Process URLs"):
     else:
         st.error("Please enter at least one URL.")
 
-# Main QA Interface
-query = st.text_input("Enter your question:", key="query_input", on_change=True)
-if query:
-    if os.path.exists(file_path):
-        with open(file_path, "rb") as f:
-            vectorstore = pickle.load(f)
-            chain = RetrievalQAWithSourcesChain.from_llm(
-                llm=GoogleGenerativeAI(model='gemini-pro', google_api_key=GOOGLE_API_KEY, temperature=0.5), 
-                retriever=vectorstore.as_retriever()
-            )
-            result = chain({"question": query}, return_only_outputs=True)
-            
-            st.header("Answer")
-            st.write(result["answer"])
+# Function to handle user queries
+def handle_queries():
+    query = st.text_input("Enter your question:", key="query_input", on_change=True)
+    if query:
+        if os.path.exists(file_path):
+            with open(file_path, "rb") as f:
+                vectorstore = pickle.load(f)
+                chain = RetrievalQAWithSourcesChain.from_llm(
+                    llm=GoogleGenerativeAI(model='gemini-pro', google_api_key=GOOGLE_API_KEY, temperature=0.5), 
+                    retriever=vectorstore.as_retriever()
+                )
+                result = chain({"question": query}, return_only_outputs=True)
+                
+                st.header("Answer")
+                st.write(result["answer"])
 
-            # Display sources, if available
-            sources = result.get("sources", "")
-            if sources:
-                st.subheader("Sources:")
-                sources_list = sources.split("\n")  # Split the sources by newline
-                for source in sources_list:
-                    st.write(source)
-            
-            time.sleep(15)  # Delay for 15 seconds before allowing the next query
-    else:
-        st.error("Vector index file does not exist. Please process the URLs first.")
+                # Display sources, if available
+                sources = result.get("sources", "")
+                if sources:
+                    st.subheader("Sources:")
+                    sources_list = sources.split("\n")  # Split the sources by newline
+                    for source in sources_list:
+                        st.write(source)
+
+                # Delay before allowing next query
+                time.sleep(15)  # Adjust delay time as needed
+        else:
+            st.error("Vector index file does not exist. Please process the URLs first.")
+
+# Start processing URLs in a separate thread
+if st.sidebar.button("Process URLs"):
+    if urls:
+        threading.Thread(target=process_urls, args=(urls,)).start()
+
+# Handle user queries
+handle_queries()
 
 # Display processed documents
 st.header("Processed Documents")
-# Access docs from session state
-docs = st.session_state.get("docs", None)
+docs = st.session_state.docs
 if docs:
     for i, doc in enumerate(docs):
         st.subheader(f"Document {i+1}")
