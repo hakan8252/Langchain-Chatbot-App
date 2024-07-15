@@ -126,3 +126,11 @@ if query:
                 st.write(source)
     else:
         st.error("Please process the URLs first.")
+
+
+# Display processed documents
+if st.session_state.docs:
+    st.header("Processed Documents")
+    for i, doc in enumerate(st.session_state.docs):
+        st.subheader(f"Document {i+1}")
+        st.write(doc.page_content[:500] + "...")  # Display first 500 characters of each document
