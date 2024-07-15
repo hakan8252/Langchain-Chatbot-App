@@ -15,6 +15,8 @@ from langchain_community.embeddings import FakeEmbeddings
 def clean_text(text):
     cleaned_text = re.sub(r'[^a-zA-Z0-9\s]', ' ', text)  # Remove non-alphanumeric characters
     cleaned_text = re.sub(r'\n', '', cleaned_text)      # Remove \n characters
+    cleaned_text = re.sub(r' ', '', cleaned_text)      # Remove \n characters
+    cleaned_text = re.sub(r'\n\n', '', cleaned_text)      # Remove \n characters
     # cleaned_text = re.sub(r'\xa0', '', cleaned_text)    # Remove non-breaking spaces
     return cleaned_text.strip()
 
