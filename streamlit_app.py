@@ -101,6 +101,8 @@ if query:
                 sources_list = sources.split("\n")  # Split the sources by newline
                 for source in sources_list:
                     st.write(source)
+            
+            time.sleep(15)  # Delay for 15 seconds before allowing the next query
     else:
         st.error("Vector index file does not exist. Please process the URLs first.")
 
