@@ -132,6 +132,8 @@ if query:
 
 # Display processed documents
 st.header("Processed Documents")
+# Access docs from session state
+docs = st.session_state.get("docs", [])
 # Display vector index creation status
 if docs:
     for i, doc in enumerate(docs):
