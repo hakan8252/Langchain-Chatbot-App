@@ -102,7 +102,13 @@ if query:
                 for source in sources_list:
                     st.write(source)
             
-            time.sleep(15)  # Delay for 15 seconds before allowing the next query
+            # Countdown timer
+            remaining_time = 15
+            with st.empty():
+                while remaining_time > 0:
+                    st.write(f"Next query available in {remaining_time} seconds.")
+                    time.sleep(1)
+                    remaining_time -= 1
     else:
         st.error("Vector index file does not exist. Please process the URLs first.")
 
