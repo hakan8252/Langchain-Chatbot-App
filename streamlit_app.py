@@ -110,7 +110,7 @@ if query:
     if st.session_state.vector_index is not None:
         vectorstore = st.session_state.vector_index
         chain = RetrievalQAWithSourcesChain.from_llm(
-            llm=GoogleGenerativeAI(model='gemini-pro', google_api_key=GOOGLE_API_KEY, temperature=0.9), 
+            llm=GoogleGenerativeAI(model='gemini-pro', google_api_key=GOOGLE_API_KEY, temperature=0.5), 
             retriever=vectorstore.as_retriever()
         )
         result = chain({"question": query}, return_only_outputs=True)
