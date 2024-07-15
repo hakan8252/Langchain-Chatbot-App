@@ -138,6 +138,6 @@ if query:
 
 # Display processed documents
 st.header("Processed Documents")
-for i, doc in enumerate(st.session_state.docs):
+for i, doc in enumerate(docs):
     st.subheader(f"Document {i+1}")
     st.write(doc.page_content[:500] + "...")  # Display first 500 characters of each document
