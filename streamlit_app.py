@@ -11,13 +11,13 @@ from langchain.vectorstores import FAISS
 from langchain.schema import Document
 from langchain_community.embeddings import FakeEmbeddings
 
-# Function to clean text by removing all special characters and \n
-def clean_text(text):
-    cleaned_text = re.sub(r'[^a-zA-Z0-9\s]', ' ', text)  # Remove non-alphanumeric characters
-    # cleaned_text = re.sub(r'\n', '', cleaned_text)      # Remove \n characters
-    # cleaned_text = re.sub(r'\n\n', '', cleaned_text)      # Remove \n characters
-    # cleaned_text = re.sub(r'\xa0', '', cleaned_text)    # Remove non-breaking spaces
-    return cleaned_text.strip()
+# # Function to clean text by removing all special characters and \n
+# def clean_text(text):
+#     cleaned_text = re.sub(r'[^a-zA-Z0-9\s]', ' ', text)  # Remove non-alphanumeric characters
+#     cleaned_text = re.sub(r'\n', '', cleaned_text)      # Remove \n characters
+#     cleaned_text = re.sub(r'\n\n', '', cleaned_text)      # Remove \n characters
+#     cleaned_text = re.sub(r'\xa0', '', cleaned_text)    # Remove non-breaking spaces
+#     return cleaned_text.strip()
 
 # Load Google API Key
 GOOGLE_API_KEY = st.secrets.secrets["GOOGLE_API_KEY"]
@@ -56,19 +56,19 @@ if st.sidebar.button("Process URLs"):
         progress.progress(1 / step_count)
         st.sidebar.text(f"Data Loading... {elapsed_time:.2f} seconds ✅")
 
-        # Step 2: Cleaning Data
-        start_time = time.time()
-        cleaned_data = []
-        for doc in data:
-            cleaned_content = clean_text(doc.page_content)
-            cleaned_doc = Document(
-                metadata=doc.metadata,
-                page_content=cleaned_content
-            )
-            cleaned_data.append(cleaned_doc)
-        elapsed_time = time.time() - start_time
-        progress.progress(2 / step_count)
-        st.sidebar.text(f"Cleaning Data... {elapsed_time:.2f} seconds ✅")
+        # # Step 2: Cleaning Data
+        # start_time = time.time()
+        # cleaned_data = []
+        # for doc in data:
+        #     cleaned_content = clean_text(doc.page_content)
+        #     cleaned_doc = Document(
+        #         metadata=doc.metadata,
+        #         page_content=cleaned_content
+        #     )
+        #     cleaned_data.append(cleaned_doc)
+        # elapsed_time = time.time() - start_time
+        # progress.progress(2 / step_count)
+        # st.sidebar.text(f"Cleaning Data... {elapsed_time:.2f} seconds ✅")
 
         # Step 3: Text Splitting
         start_time = time.time()
@@ -77,7 +77,7 @@ if st.sidebar.button("Process URLs"):
             chunk_size=1000,
             chunk_overlap=200
         )
-        docs = text_splitter.split_documents(cleaned_data)
+        docs = text_splitter.split_documents(data)
         st.session_state.docs = docs  # Store docs in session state
         elapsed_time = time.time() - start_time
         progress.progress(3 / step_count)
