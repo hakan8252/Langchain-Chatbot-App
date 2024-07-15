@@ -1,7 +1,6 @@
 import os
 import pickle
 import re
-import time
 import streamlit as st
 from langchain_google_genai import GoogleGenerativeAI
 from langchain.chains import RetrievalQAWithSourcesChain
@@ -14,8 +13,8 @@ from langchain_community.embeddings import FakeEmbeddings
 # Function to clean text by removing all special characters and \n
 def clean_text(text):
     cleaned_text = re.sub(r'[^a-zA-Z0-9\s]', ' ', text)  # Remove non-alphanumeric characters
-    cleaned_text = re.sub(r'\n', '', cleaned_text)      # Remove \n characters
-    cleaned_text = re.sub(r'\xa0', '', cleaned_text)    # Remove non-breaking spaces
+    cleaned_text = re.sub(r'\n', ' ', cleaned_text)      # Remove \n characters
+    cleaned_text = re.sub(r'\xa0', ' ', cleaned_text)    # Remove non-breaking spaces
     return cleaned_text.strip()
 
 # Load Google API Key
@@ -41,15 +40,16 @@ file_path = "vector_index.pkl"
 
 if st.sidebar.button("Process URLs"):
     if urls:
-        main_placeholder.text("Data Loading...Started...✅✅✅")
+        progress = st.progress(0)
         
-        # Define URL Loader
+        # Step 1: Data Loading
+        progress.text("Data Loading...Started...✅✅✅")
+        progress.progress(5)
         loaders = UnstructuredURLLoader(urls=urls)
-        
-        # Load Data
         data = loaders.load()
+        progress.progress(5)
         
-        # Clean the content of each document
+        # Step 2: Cleaning Data
         cleaned_data = []
         for doc in data:
             cleaned_content = clean_text(doc.page_content)
@@ -58,23 +58,25 @@ if st.sidebar.button("Process URLs"):
                 page_content=cleaned_content
             )
             cleaned_data.append(cleaned_doc)
+        progress.progress(5)
         
-        # Split Documents
+        # Step 3: Text Splitting
         text_splitter = RecursiveCharacterTextSplitter(
             separators=['\n\n', '\n', '.', ' '],
             chunk_size=1000,
             chunk_overlap=200
         )
-        main_placeholder.text("Text Splitting...Started...✅✅✅")
+        progress.text("Text Splitting...Started...✅✅✅")
         docs = text_splitter.split_documents(cleaned_data)
+        progress.progress(10)
         
-        # Define Embeddings
+        # Step 4: Embedding
         embeddings = FakeEmbeddings(size=200)
-        
-        # Create FAISS Vector Index
-        main_placeholder.text("Building Embedding Vector...✅✅✅")
+        progress.text("Building Embedding Vector...✅✅✅")
         vectorindex_openai = FAISS.from_documents(docs, embeddings)
+        progress.progress(10)
         
+        # Save Vector Index
         with open(file_path, "wb") as f:
             pickle.dump(vectorindex_openai, f)
 
