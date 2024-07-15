@@ -18,11 +18,10 @@ def clean_text(text):
     cleaned_text = re.sub(r'\xa0', ' ', cleaned_text)   # Remove non-breaking spaces
     return cleaned_text.strip()
 
-from dotenv import load_dotenv
-load_dotenv()  # take environment variables from .env (especially openai api key)
+GOOGLE_API_KEY=st.secrets.secrets.GOOGLE_API_KEY
 
 main_placeholder = st.empty()
-llm = GoogleGenerativeAI(model='gemini-pro', temperature=0.9)
+llm = GoogleGenerativeAI(model='gemini-pro', google_api_key = GOOGLE_API_KEY, temperature=0.9)
 
 # Streamlit App
 st.title("Retrieval-Based QA System")
