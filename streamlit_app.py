@@ -1,6 +1,7 @@
 import os
 import pickle
 import re
+import time
 import streamlit as st
 from langchain_google_genai import GoogleGenerativeAI
 from langchain.chains import RetrievalQAWithSourcesChain
@@ -40,16 +41,19 @@ file_path = "vector_index.pkl"
 
 if st.sidebar.button("Process URLs"):
     if urls:
-        progress = st.progress(0)
+        progress = st.sidebar.progress(0)
+        step_count = 5
         
         # Step 1: Data Loading
-        progress.text("Data Loading...Started...✅✅✅")
-        progress.progress(5)
+        start_time = time.time()
         loaders = UnstructuredURLLoader(urls=urls)
         data = loaders.load()
-        progress.progress(5)
+        elapsed_time = time.time() - start_time
+        progress.progress(1 / step_count)
+        st.sidebar.text(f"Data Loading... {elapsed_time:.2f} seconds ✅")
         
         # Step 2: Cleaning Data
+        start_time = time.time()
         cleaned_data = []
         for doc in data:
             cleaned_content = clean_text(doc.page_content)
@@ -58,30 +62,39 @@ if st.sidebar.button("Process URLs"):
                 page_content=cleaned_content
             )
             cleaned_data.append(cleaned_doc)
-        progress.progress(5)
+        elapsed_time = time.time() - start_time
+        progress.progress(2 / step_count)
+        st.sidebar.text(f"Cleaning Data... {elapsed_time:.2f} seconds ✅")
         
         # Step 3: Text Splitting
+        start_time = time.time()
         text_splitter = RecursiveCharacterTextSplitter(
             separators=['\n\n', '\n', '.', ' '],
             chunk_size=1000,
             chunk_overlap=200
         )
-        progress.text("Text Splitting...Started...✅✅✅")
         docs = text_splitter.split_documents(cleaned_data)
-        progress.progress(10)
+        elapsed_time = time.time() - start_time
+        progress.progress(3 / step_count)
+        st.sidebar.text(f"Text Splitting... {elapsed_time:.2f} seconds ✅")
         
         # Step 4: Embedding
+        start_time = time.time()
         embeddings = FakeEmbeddings(size=200)
-        progress.text("Building Embedding Vector...✅✅✅")
         vectorindex_openai = FAISS.from_documents(docs, embeddings)
-        progress.progress(10)
+        elapsed_time = time.time() - start_time
+        progress.progress(4 / step_count)
+        st.sidebar.text(f"Building Embedding Vector... {elapsed_time:.2f} seconds ✅")
         
         # Save Vector Index
+        start_time = time.time()
         with open(file_path, "wb") as f:
             pickle.dump(vectorindex_openai, f)
-
+        elapsed_time = time.time() - start_time
+        progress.progress(5 / step_count)
+        st.sidebar.text(f"Saving Vector Index... {elapsed_time:.2f} seconds ✅")
+        
         st.success("URLs processed successfully.")
-        st.experimental_rerun()
     else:
         st.error("Please enter at least one URL.")
 
