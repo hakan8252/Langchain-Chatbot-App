@@ -42,6 +42,7 @@ if st.sidebar.button("Process URLs"):
         elapsed_time = time.time() - start_time
         progress.progress(1 / step_count)
         st.sidebar.text(f"Data Loading... {elapsed_time:.2f} seconds ✅")
+        time.sleep(4)
 
         # Step 3: Text Splitting
         start_time = time.time()
@@ -55,6 +56,7 @@ if st.sidebar.button("Process URLs"):
         elapsed_time = time.time() - start_time
         progress.progress(2 / step_count)
         st.sidebar.text(f"Text Splitting... {elapsed_time:.2f} seconds ✅")
+        time.sleep(6)
 
         # Step 4: Embedding
         start_time = time.time()
@@ -63,7 +65,7 @@ if st.sidebar.button("Process URLs"):
         elapsed_time = time.time() - start_time
         progress.progress(3 / step_count)
         st.sidebar.text(f"Building Embedding Vector... {elapsed_time:.2f} seconds ✅")
-        time.sleep(4)
+        time.sleep(6)
 
         # Step 5: Saving Vector Index
         start_time = time.time()
