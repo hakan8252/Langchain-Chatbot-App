@@ -1,6 +1,7 @@
 import os
 import pickle
 import re
+import time
 import streamlit as st
 from langchain_google_genai import GoogleGenerativeAI
 from langchain.chains import RetrievalQAWithSourcesChain
@@ -17,6 +18,12 @@ def clean_text(text):
     cleaned_text = re.sub(r'\xa0', ' ', cleaned_text)   # Remove non-breaking spaces
     return cleaned_text.strip()
 
+from dotenv import load_dotenv
+load_dotenv()  # take environment variables from .env (especially openai api key)
+
+main_placeholder = st.empty()
+llm = GoogleGenerativeAI(model='gemini-pro', temperature=0.9)
+
 # Streamlit App
 st.title("Retrieval-Based QA System")
 
@@ -29,6 +36,9 @@ for i in range(num_urls):
     if url:
         urls.append(url)
 
+# Store vector index locally
+file_path = "vector_index.pkl"
+
 if st.sidebar.button("Process URLs"):
     if urls:
         # Define URL Loader
@@ -36,6 +46,7 @@ if st.sidebar.button("Process URLs"):
         
         # Load Data
         data = loaders.load()
+        main_placeholder.text("Data Loading...Started...✅✅✅")
         
         # Clean the content of each document
         cleaned_data = []
@@ -53,6 +64,7 @@ if st.sidebar.button("Process URLs"):
             chunk_size=1000,
             chunk_overlap=200
         )
+        main_placeholder.text("Text Splitter...Started...✅✅✅")
         docs = text_splitter.split_documents(cleaned_data)
         
         # Define Embeddings
@@ -60,40 +72,31 @@ if st.sidebar.button("Process URLs"):
         
         # Create FAISS Vector Index
         vectorindex_openai = FAISS.from_documents(docs, embeddings)
-        
-        # Store vector index locally
-        file_path = "vector_index.pkl"
+        main_placeholder.text("Embedding Vector Started Building...✅✅✅")
+        time.sleep(2)
+
         with open(file_path, "wb") as f:
             pickle.dump(vectorindex_openai, f)
-        
-        # Load vector index from file
-        if os.path.exists(file_path):
-            with open(file_path, "rb") as f:
-                vectorIndex = pickle.load(f)
-        
-        # Create QA Chain
-        GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
-        llm = GoogleGenerativeAI(model='gemini-pro', google_api_key=GOOGLE_API_KEY, temperature=0.9)
-        chain = RetrievalQAWithSourcesChain.from_llm(llm=llm, retriever=vectorIndex.as_retriever())
-        
-        st.session_state["chain"] = chain
+
         st.success("URLs processed successfully.")
     else:
         st.error("Please enter at least one URL.")
 
-# Main QA Interface
-query = st.text_input("Enter your question:")
-if st.button("Get Answer"):
-    if query:
-        if "chain" in st.session_state:
-            chain = st.session_state["chain"]
-            result = chain({"question": query}, return_only_outputs=False)
-            st.write("**Answer:**")
-            st.write(result['answer'])
-            st.write("**Sources:**")
-            for source in result['sources']:
-                st.write(source)
-        else:
-            st.error("Please process the URLs first.")
-    else:
-        st.write("Please enter a question.")
+query = main_placeholder.text_input("Question: ")
+if query:
+    if os.path.exists(file_path):
+        with open(file_path, "rb") as f:
+            vectorstore = pickle.load(f)
+            chain = RetrievalQAWithSourcesChain.from_llm(llm=llm, retriever=vectorstore.as_retriever())
+            result = chain({"question": query}, return_only_outputs=True)
+            # result will be a dictionary of this format --> {"answer": "", "sources": [] }
+            st.header("Answer")
+            st.write(result["answer"])
+
+            # Display sources, if available
+            sources = result.get("sources", "")
+            if sources:
+                st.subheader("Sources:")
+                sources_list = sources.split("\n")  # Split the sources by newline
+                for source in sources_list:
+                    st.write(source)
