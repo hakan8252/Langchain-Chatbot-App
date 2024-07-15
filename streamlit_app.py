@@ -50,7 +50,7 @@ if st.sidebar.button("Process URLs"):
         # Step 3: Text Splitting
         start_time = time.time()
         text_splitter = RecursiveCharacterTextSplitter(
-            # separators=['\n\n', '\n', '.', ' '],
+            separators=['\n\n', '\n', '.', ' '],
             chunk_size=1000,
             chunk_overlap=100
         )
