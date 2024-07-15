@@ -13,8 +13,8 @@ from langchain_community.embeddings import FakeEmbeddings
 # Function to clean text by removing all special characters and \n
 def clean_text(text):
     cleaned_text = re.sub(r'[^a-zA-Z0-9\s]', ' ', text)  # Remove non-alphanumeric characters
-    cleaned_text = re.sub(r'\n', ' ', cleaned_text)      # Remove \n characters
-    cleaned_text = re.sub(r'\xa0', ' ', cleaned_text)    # Remove non-breaking spaces
+    cleaned_text = re.sub(r'\n', '', cleaned_text)      # Remove \n characters
+    cleaned_text = re.sub(r'\xa0', '', cleaned_text)    # Remove non-breaking spaces
     return cleaned_text.strip()
 
 # Load Google API Key
@@ -81,6 +81,7 @@ if st.sidebar.button("Process URLs"):
             pickle.dump(vectorindex_openai, f)
 
         st.success("URLs processed successfully.")
+        st.experimental_rerun()
     else:
         st.error("Please enter at least one URL.")
 
