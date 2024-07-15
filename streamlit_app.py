@@ -9,6 +9,7 @@ from langchain.document_loaders import UnstructuredURLLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import FAISS
 from langchain.schema import Document
+import langchain
 from langchain_community.embeddings import FakeEmbeddings
 
 # # Function to clean text by removing all special characters and \n
@@ -113,6 +114,7 @@ if query:
             llm=GoogleGenerativeAI(model='gemini-pro', google_api_key=GOOGLE_API_KEY, temperature=0.5), 
             retriever=vectorstore.as_retriever()
         )
+        langchain.debug=True
         result = chain({"question": query}, return_only_outputs=True)
         
         st.header("Answer")
