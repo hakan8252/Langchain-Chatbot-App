@@ -20,9 +20,11 @@ st.title("Retrieval-Based QA System")
 
 # Sidebar for URL input and processing
 st.sidebar.title("News Article URLs")
+# Set the default URL
+default_url = "https://www.euronews.com/my-europe/2024/07/16/two-far-right-groups-cordoned-off-from-power-roles-in-the-european-parliament"
 num_urls = st.sidebar.slider("Number of URLs", min_value=1, max_value=5, value=1)
-urls = []
-for i in range(num_urls):
+urls = [default_url]  # Initialize with the default URL
+for i in range(1, num_urls):  # Start from 1 since the default URL is already included
     url = st.sidebar.text_input(f"URL {i+1}", key=f"url_{i+1}")
     if url:
         urls.append(url)
@@ -82,8 +84,11 @@ if st.sidebar.button("Process URLs"):
     else:
         st.error("Please enter at least one URL.")
 
+
+default_query = "What is the main context of the text?"
+
 # Main QA Interface
-query = st.text_input("Enter your question:")
+query = st.text_input("Enter your question:", value=default_query)
 if query:
     if os.path.exists(file_path):
         with open(file_path, "rb") as f:
