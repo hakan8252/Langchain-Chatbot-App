@@ -20,12 +20,12 @@ st.title("Retrieval-Based QA System")
 
 # Sidebar for URL input and processing
 st.sidebar.title("News Article URLs")
-# Set the default URL
+# Set the default URL as a placeholder
 default_url = "https://www.euronews.com/my-europe/2024/07/16/two-far-right-groups-cordoned-off-from-power-roles-in-the-european-parliament"
 num_urls = st.sidebar.slider("Number of URLs", min_value=1, max_value=5, value=1)
-urls = [default_url]  # Initialize with the default URL
-for i in range(1, num_urls):  # Start from 1 since the default URL is already included
-    url = st.sidebar.text_input(f"URL {i+1}", key=f"url_{i+1}")
+urls = []
+for i in range(num_urls):
+    url = st.sidebar.text_input(f"URL {i+1}", value=default_url if i == 0 else "", key=f"url_{i+1}")
     if url:
         urls.append(url)
 
